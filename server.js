@@ -8,9 +8,9 @@ app.use(express.json());
 // База ключей. Если стоит null — ключ свободен. 
 // Если написать ник в кавычках — ключ уже будет занят этим ником.
 const keysDB = {
-    "ZXC-KEY-1": null,
-    "ZXC-KEY-2": null,
-    "MY-VIP-KEY": "Z1XR11" // Пример ключа, который уже закреплен за ником Z1XR11
+    "S5UV‑WX9Y‑ZA2B‑CD3E": "Zahar_76"
+    "X7YZ‑JK1L‑MN2O‑PQ3R": "lypit9K360"
+    "F4GH‑IJ1K‑LM2N‑OP3Q": "b3tasync"
 };
 
 // Считываем твой чит из файла script.lua
