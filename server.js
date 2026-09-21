@@ -8,8 +8,8 @@ app.use(express.json());
 // База ключей. Если стоит null — ключ свободен. 
 // Если написать ник в кавычках — ключ уже будет занят этим ником.
 const keysDB = {
-    "S5UV‑WX9Y‑ZA2B‑CD3E": "Zahar_76"
-    "X7YZ‑JK1L‑MN2O‑PQ3R": "lypit9K360"
+    "S5UV‑WX9Y‑ZA2B‑CD3E": "Zahar_76",
+    "X7YZ‑JK1L‑MN2O‑PQ3R": "lypit9K360",
     "F4GH‑IJ1K‑LM2N‑OP3Q": "b3tasync"
 };
 
