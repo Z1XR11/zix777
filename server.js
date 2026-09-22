@@ -11,6 +11,8 @@ const keysDB = {
     "S5UV‑WX9Y‑ZA2B‑CD3E": "Zahar_76",
     "X7YZ‑JK1L‑MN2O‑PQ3R": "lypit9K360",
     "F4GH‑IJ1K‑LM2N‑OP3Q": "b3tasync"
+    "UV3W‑XY4Z‑AB5C‑DE6F": "Lartime56"
+    "F4GH‑IJ1K‑LM2N‑OP3Q": "zahar_4786"
 };
 
 // Считываем твой чит из файла script.lua
