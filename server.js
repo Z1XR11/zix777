@@ -45,13 +45,14 @@ app.post('/validate', (req, res) => {
     // Если всё верно, отдаем скрипт!
     console.log(`✅ Игрок ${username} успешно активировал скрипт.`);
     res.json({ success: true, script: REAL_SCRIPT });
+
+});
+// Проверка статуса сервера
+app.get('/ping', (req, res) => {
+    res.status(200).send("OK");
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`🚀 Сервер запущен на порту ${PORT}`);
-});
-// Проверка статуса сервера
-app.get('/ping', (req, res) => {
-    res.status(200).send("OK");
 });
