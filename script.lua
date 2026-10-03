@@ -1,17 +1,18 @@
 --[[
     ============================================================
     ALPHA SANDBOX ULTRA ++ [PREMIUM FULL EDITION]
-    Version: 5.0 (Themes • Languages • Button Styles)
+    Version: 5.1 (Themes Fix • Items Tab • Spawner Stub • Window Stub)
     ============================================================
-    ЧТО НОВОГО В V5 (все правки по запросу, логика V3/V4 сохранена):
-    - ИГРОКИ: убран список и выбор игрока — все читы сразу на себя
-    - Прокрутка: AutomaticCanvasSize вместо ручного CanvasSize
-      (исправлен баг «медленно-медленно и потом пролистывается»)
-    - ТЕМЫ: 3 штуки — Чёрная / Белая / Прозрачная (стекло)
-    - ЯЗЫКИ: Русский / English / Українська — весь интерфейс
-    - КНОПКА МЕНЮ: 2 вида (круглая и плоская), перетаскивается
-      с прилипанием: круглая — к углам и краям, плоская — верх/низ
-    - Всё из V4 сохранено: Ripple, тосты, сайдбар, Val-фикс и т.д.
+    ЧТО НОВОГО В V5.1:
+    - ТЕМЫ ПОЧИНЕНЫ: перекраска по ролям (BgKey/TextKey/StrokeKey),
+      а не по совпадению цветов — работает Чёрная/Белая/Прозрачная
+    - ПОДСВЕТКА: при закрытии меню снимается, при открытии снова
+      подсвечивается выбранная машина/предмет
+    - ВКЛАДКА "ЛУТ" переименована в "ПРЕДМЕТЫ", ищет ТОЛЬКО модели
+      (звуки/аудио исключены)
+    - НОВАЯ ВКЛАДКА "СПАВНЕР" (каркас, заполняется позже)
+    - ИГРОКИ: кнопка "ОКНО" (заглушка, окно сделаем позже)
+    - Кнопки больше не уменьшаются при клике
     ============================================================
 ]]
 
@@ -110,6 +111,7 @@ local Palettes = {
 
 local CurrentTheme = "black"
 local MainBaseTransparency = 0
+local PanelBaseTransparency = 0
 
 -- ==========================================
 -- ЯЗЫКИ: русский (исходник) / English / Українська
@@ -118,11 +120,11 @@ local MainBaseTransparency = 0
 local I18N = {
     en = {
         ["ВКЛАДКИ"] = "TABS",
-        ["АВТО"] = "AUTO", ["ЛУТ"] = "LOOT", ["ИГРОКИ"] = "PLAYERS",
+        ["АВТО"] = "AUTO", ["ПРЕДМЕТЫ"] = "ITEMS", ["СПАВНЕР"] = "SPAWNER", ["ИГРОКИ"] = "PLAYERS",
         ["ТЕЛЕПОРТ"] = "TELEPORT", ["НАСТРОЙКИ"] = "SETTINGS",
         ["ПКМ CTRL — полёт • Y — зомби • P — детонатор • L — активатор • CTRL+ЛКМ — телепорт"] = "R-CTRL — fly • Y — zombie • P — detonator • L — activator • CTRL+CLICK — teleport",
         ["🔍 НАЙТИ МАШИНЫ В МИРЕ"] = "🔍 FIND CARS IN WORLD",
-        ["🔍 НАЙТИ ЛУТ И МОТОРЫ"] = "🔍 FIND LOOT & ENGINES",
+        ["🔍 НАЙТИ ПРЕДМЕТЫ И МОТОРЫ"] = "🔍 FIND ITEMS & ENGINES",
         [" ЗНАЧЕНИЯ (VALUES)"] = " VALUES",
         [" ФИЗИКА КОЛЁС"] = " WHEEL PHYSICS",
         ["Трение (Friction)"] = "Friction",
@@ -167,7 +169,7 @@ local I18N = {
         ["Выбрана машина: "] = "Car selected: ",
         ["Выбран предмет: "] = "Item selected: ",
         ["Сканирование мира завершено"] = "World scan complete",
-        ["Сканирование лута завершено"] = "Loot scan complete",
+        ["Сканирование завершено"] = "Scan complete",
         ["Infinite Yield запущен"] = "Infinite Yield loaded",
         [" загружен"] = " loaded",
         ["Игрок зашёл: "] = "Player joined: ",
@@ -182,11 +184,11 @@ local I18N = {
     },
     ua = {
         ["ВКЛАДКИ"] = "ВКЛАДКИ",
-        ["АВТО"] = "АВТО", ["ЛУТ"] = "ЛУТ", ["ИГРОКИ"] = "ГРАВЦІ",
+        ["АВТО"] = "АВТО", ["ПРЕДМЕТЫ"] = "ПРЕДМЕТИ", ["СПАВНЕР"] = "СПАВНЕР", ["ИГРОКИ"] = "ГРАВЦІ",
         ["ТЕЛЕПОРТ"] = "ТЕЛЕПОРТ", ["НАСТРОЙКИ"] = "НАЛАШТУВАННЯ",
         ["ПКМ CTRL — полёт • Y — зомби • P — детонатор • L — активатор • CTRL+ЛКМ — телепорт"] = "ПКМ CTRL — політ • Y — зомбі • P — детонатор • L — активатор • CTRL+ЛКМ — телепорт",
         ["🔍 НАЙТИ МАШИНЫ В МИРЕ"] = "🔍 ЗНАЙТИ АВТО У СВІТІ",
-        ["🔍 НАЙТИ ЛУТ И МОТОРЫ"] = "🔍 ЗНАЙТИ ЛУТ І МОТОРИ",
+        ["🔍 НАЙТИ ПРЕДМЕТЫ И МОТОРЫ"] = "🔍 ЗНАЙТИ ПРЕДМЕТИ І МОТОРИ",
         [" ЗНАЧЕНИЯ (VALUES)"] = " ЗНАЧЕННЯ (VALUES)",
         [" ФИЗИКА КОЛЁС"] = " ФІЗИКА КОЛІС",
         ["Трение (Friction)"] = "Тертя (Friction)",
@@ -231,7 +233,7 @@ local I18N = {
         ["Выбрана машина: "] = "Обрано авто: ",
         ["Выбран предмет: "] = "Обрано предмет: ",
         ["Сканирование мира завершено"] = "Сканування світу завершено",
-        ["Сканирование лута завершено"] = "Сканування луту завершено",
+        ["Сканирование завершено"] = "Сканування завершено",
         ["Infinite Yield запущен"] = "Infinite Yield запущено",
         [" загружен"] = " завантажено",
         ["Игрок зашёл: "] = "Гравець зайшов: ",
@@ -260,7 +262,7 @@ local AnimInfo = {
     Bounce = TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
 }
 
-local SCRIPT_VERSION = "V5.0"
+local SCRIPT_VERSION = "V5.1"
 
 -- ==========================================
 -- УТИЛИТЫ ДЛЯ СОЗДАНИЯ ИНТЕРФЕЙСА
@@ -269,6 +271,26 @@ local function Create(className, properties)
     local inst = Instance.new(className)
     for k, v in pairs(properties) do
         pcall(function() inst[k] = v end)
+    end
+    if (className == "TextLabel" or className == "TextButton" or className == "TextBox") and inst.Text ~= nil and inst:GetAttribute("SrcText") == nil then
+        inst:SetAttribute("SrcText", inst.Text)
+    end
+    if inst:IsA("GuiObject") then
+        if inst.BackgroundColor3 and inst.BackgroundTransparency ~= 1 then
+            for k, v in pairs(Theme) do
+                if v == inst.BackgroundColor3 then inst:SetAttribute("BgKey", k); break end
+            end
+        end
+    end
+    if inst:IsA("TextLabel") or inst:IsA("TextButton") or inst:IsA("TextBox") then
+        for k, v in pairs(Theme) do
+            if v == inst.TextColor3 then inst:SetAttribute("TextKey", k); break end
+        end
+    end
+    if inst:IsA("UIStroke") then
+        for k, v in pairs(Theme) do
+            if v == inst.Color then inst:SetAttribute("StrokeKey", k); break end
+        end
     end
     return inst
 end
@@ -286,18 +308,6 @@ local function AddStroke(parent, color, thickness)
     })
 end
 
-local function ApplyGradient(parent, colorStart, colorEnd, rotation)
-    return Create("UIGradient", {
-        Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, colorStart),
-            ColorSequenceKeypoint.new(1, colorEnd)
-        }),
-        Rotation = rotation or 90,
-        Parent = parent
-    })
-end
-
--- ==========================================
 -- СИСТЕМА УВЕДОМЛЕНИЙ (ТОСТЫ)
 -- ==========================================
 local NotifyHolder = Create("Frame", {
@@ -328,7 +338,6 @@ local function Notify(text, color)
     })
     AddCorner(Card, 10)
     AddStroke(Card, color or Theme.Accent, 1.5)
-    ApplyGradient(Card, Theme.Header, Theme.Background, 90)
 
     Create("TextLabel", {
         Size = UDim2.new(1, -24, 1, 0),
@@ -394,6 +403,13 @@ local function CreateButtonEx(parent, text, baseColor, hoverColor, callback)
     local cBase = baseColor or Theme.ElementBg
     local cHover = hoverColor or Theme.ElementHover
 
+    local baseKey = "ElementBg"
+    local hoverKey = "ElementHover"
+    for k, v in pairs(Theme) do
+        if v == cBase then baseKey = k end
+        if v == cHover then hoverKey = k end
+    end
+
     local Btn = Create("TextButton", {
         Size = UDim2.new(0.98, 0, 0, 40),
         BackgroundColor3 = cBase,
@@ -407,20 +423,23 @@ local function CreateButtonEx(parent, text, baseColor, hoverColor, callback)
     })
     Btn:SetAttribute("BaseColor", cBase)
     Btn:SetAttribute("HoverColor", cHover)
+    Btn:SetAttribute("BaseKey", baseKey)
+    Btn:SetAttribute("HoverKey", hoverKey)
 
     AddCorner(Btn, 10)
     local stroke = AddStroke(Btn, Theme.Outline, 1)
-    ApplyGradient(Btn, Color3.fromRGB(255, 255, 255), Color3.fromRGB(190, 190, 210), 90)
 
     Btn.MouseEnter:Connect(function()
-        TweenService:Create(Btn, AnimInfo.Fast, {BackgroundColor3 = Btn:GetAttribute("HoverColor") or cHover}):Play()
+        local hoverCol = Theme[Btn:GetAttribute("HoverKey") or "ElementHover"]
+        TweenService:Create(Btn, AnimInfo.Fast, {BackgroundColor3 = hoverCol or cHover}):Play()
         if not baseColor then
             TweenService:Create(stroke, AnimInfo.Fast, {Color = Theme.Accent}):Play()
         end
     end)
 
     Btn.MouseLeave:Connect(function()
-        TweenService:Create(Btn, AnimInfo.Fast, {BackgroundColor3 = Btn:GetAttribute("BaseColor") or cBase}):Play()
+        local baseCol = Theme[Btn:GetAttribute("BaseKey") or "ElementBg"]
+        TweenService:Create(Btn, AnimInfo.Fast, {BackgroundColor3 = baseCol or cBase}):Play()
         if not baseColor then
             TweenService:Create(stroke, AnimInfo.Fast, {Color = Theme.Outline}):Play()
         end
@@ -434,9 +453,6 @@ local function CreateButtonEx(parent, text, baseColor, hoverColor, callback)
 
     if callback then
         Btn.MouseButton1Click:Connect(function()
-            TweenService:Create(Btn, AnimInfo.Fast, {Size = Btn.Size - UDim2.new(0, 0, 0, 4)}):Play()
-            task.wait(0.08)
-            TweenService:Create(Btn, AnimInfo.Bounce, {Size = Btn.Size}):Play()
             callback(Btn)
         end)
     end
@@ -452,7 +468,6 @@ local function CreateToggle(parent, text, default, callback)
     })
     AddCorner(ToggleFrame, 10)
     AddStroke(ToggleFrame, Theme.Outline, 1)
-    ApplyGradient(ToggleFrame, Theme.ElementBg, Theme.Background, 90)
 
     Create("TextLabel", {
         Size = UDim2.new(0.7, 0, 1, 0),
@@ -553,7 +568,6 @@ local function Slider(parent, text, min, max, step, default, callback)
         Parent = track
     })
     AddCorner(fill, 4)
-    ApplyGradient(fill, Theme.Accent, Theme.AccentHover, 0)
 
     local knob = Create("TextButton", {
         Size = UDim2.new(0, 18, 0, 18),
@@ -638,6 +652,38 @@ AddStroke(MainFrame, Theme.Outline, 1.5)
 
 local MainScale = Create("UIScale", {Scale = 1, Parent = MainFrame})
 
+-- Реестр подсветок (ESP) — создаётся до OpenMenu/CloseMenu,
+-- чтобы закрытие меню могло снимать подсветку со всего.
+local HighlightRegistry = {}
+local SelectedTargets = {}
+
+local function ClearAllHighlights()
+    for i, hl in ipairs(HighlightRegistry) do
+        pcall(function() if hl.Parent then hl:Destroy() end end)
+    end
+    HighlightRegistry = {}
+end
+
+local function RestoreAllHighlights()
+    ClearAllHighlights()
+    for _, entry in ipairs(SelectedTargets) do
+        local t = entry and entry[1]
+        local color = entry and entry[2]
+        pcall(function()
+            if t and t.Parent then
+                local hl = Instance.new("Highlight")
+                hl.Name = "EditorESP"
+                hl.FillColor = color or Theme.Accent
+                hl.OutlineColor = Color3.new(1, 1, 1)
+                hl.FillTransparency = 0.5
+                hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                hl.Parent = t
+                table.insert(HighlightRegistry, hl)
+            end
+        end)
+    end
+end
+
 -- ШАПКА
 local Header = Create("Frame", {
     Size = UDim2.new(1, 0, 0, 52),
@@ -647,7 +693,6 @@ local Header = Create("Frame", {
 })
 AddCorner(Header, 14)
 Create("Frame", {Size = UDim2.new(1, 0, 0, 14), Position = UDim2.new(0, 0, 1, -14), BackgroundColor3 = Theme.Header, BorderSizePixel = 0, Parent = Header})
-ApplyGradient(Header, Theme.Header, Theme.Background, 90)
 
 Create("TextLabel", {
     Size = UDim2.new(0, 40, 1, 0),
@@ -866,11 +911,17 @@ SelectTab = function(index)
         TweenService:Create(t.Icon, AnimInfo.Fast, {TextColor3 = active and Color3.fromRGB(255, 255, 255) or Theme.TextDim}):Play()
         TweenService:Create(t.Stroke, AnimInfo.Fast, {Color = active and Theme.Accent or Theme.Outline}):Play()
         Pages[i].Visible = active
+        if active then
+            task.spawn(function()
+                pcall(function() Pages[i].CanvasPosition = Vector2.new(0, 0) end)
+            end)
+        end
     end
 end
 
 local PageAuto = CreateTab("🚗", "АВТО")
-local PageLoot = CreateTab("📦", "ЛУТ")
+local PageItems = CreateTab("📦", "ПРЕДМЕТЫ")
+local PageSpawner = CreateTab("➕", "СПАВНЕР")
 local PagePlayers = CreateTab("👤", "ИГРОКИ")
 local PageTeleport = CreateTab("🌌", "ТЕЛЕПОРТ")
 local PageSettings = CreateTab("⚙️", "НАСТРОЙКИ")
@@ -932,20 +983,52 @@ local function SetButtonStyle(style)
     SnapButton()
 end
 
+local function RestorePanelTransparency()
+    MainFrame.BackgroundTransparency = MainBaseTransparency
+    Header.BackgroundTransparency = PanelBaseTransparency
+    Sidebar.BackgroundTransparency = PanelBaseTransparency
+    Footer.BackgroundTransparency = PanelBaseTransparency
+end
+
+local savedTransparencies = {}
+local savedTextTransparencies = {}
+
 local function OpenMenu()
     OpenBtn.Visible = false
     MainFrame.Visible = true
     MainScale.Scale = 0.88
+    RestorePanelTransparency()
+    RestoreAllHighlights()
+    for _, obj in ipairs(MainFrame:GetDescendants()) do
+        if obj:IsA("GuiObject") then
+            local saved = savedTransparencies[obj]
+            if saved ~= nil then obj.BackgroundTransparency = saved end
+        end
+        if obj:IsA("TextLabel") or obj:IsA("TextButton") or obj:IsA("TextBox") then
+            local t = savedTextTransparencies[obj]
+            obj.TextTransparency = t or 0
+        end
+    end
+    savedTransparencies = {}
+    savedTextTransparencies = {}
     TweenService:Create(MainScale, AnimInfo.Bounce, {Scale = 1}):Play()
 end
 
 local function CloseMenu()
-    TweenService:Create(MainScale, AnimInfo.Smooth, {Scale = 0.88}):Play()
-    TweenService:Create(MainFrame, AnimInfo.Smooth, {BackgroundTransparency = 1}):Play()
-    task.wait(0.26)
+    ClearAllHighlights()
+    for _, obj in ipairs(MainFrame:GetDescendants()) do
+        if obj:IsA("GuiObject") then
+            savedTransparencies[obj] = obj.BackgroundTransparency
+            obj.BackgroundTransparency = 1
+        end
+        if obj:IsA("TextLabel") or obj:IsA("TextButton") or obj:IsA("TextBox") then
+            savedTextTransparencies[obj] = obj.TextTransparency
+            obj.TextTransparency = 1
+        end
+    end
+    TweenService:Create(MainScale, AnimInfo.Smooth, {Scale = 0.8}):Play()
+    task.wait(0.3)
     MainFrame.Visible = false
-    MainScale.Scale = 1
-    MainFrame.BackgroundTransparency = MainBaseTransparency
     OpenBtn.Visible = true
 end
 
@@ -1197,6 +1280,18 @@ Players.PlayerRemoving:Connect(updateTpList)
 updateTpList()
 
 -- ==========================================
+-- ВКЛАДКА "СПАВНЕР" (каркас, заполняется позже)
+-- ==========================================
+local SpawnerBtn = CreateButtonEx(PageSpawner, "🛠 СПАВНЕР ПРЕДМЕТОВ (скоро)", Theme.Accent, Theme.AccentHover, function() end)
+SpawnerBtn.Size = UDim2.new(0.98, 0, 0, 46)
+Create("TextLabel", {
+    Size = UDim2.new(0.98, 0, 0, 80), BackgroundTransparency = 1,
+    Text = "Здесь будет спавнер предметов.\nПока пусто — заготовка на будущее.",
+    TextColor3 = Theme.TextDim, Font = Enum.Font.Gotham, TextSize = 13,
+    TextWrapped = true, Parent = PageSpawner
+})
+
+-- ==========================================
 -- ВКЛАДКА "АВТО" (кнопка наверху, таблицы на всю высоту)
 -- ==========================================
 local FindCarsBtn = CreateButtonEx(PageAuto, T("🔍 НАЙТИ МАШИНЫ В МИРЕ"), Theme.Accent, Theme.AccentHover, function() end)
@@ -1215,9 +1310,13 @@ local sCar = nil
 local cBts = {}
 local sCarHL = nil
 
-local function applyHighlight(target, oldHighlight, color)
-    pcall(function() if oldHighlight then oldHighlight:Destroy() end end)
+local function applyHighlight(target, color)
+    SelectedTargets = {}
+    ClearAllHighlights()
     if target then
+        if target:FindFirstChildOfClass("Highlight") then
+            return nil
+        end
         local hl = Instance.new("Highlight")
         hl.Name = "EditorESP"
         hl.FillColor = color
@@ -1225,6 +1324,8 @@ local function applyHighlight(target, oldHighlight, color)
         hl.FillTransparency = 0.5
         hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
         hl.Parent = target
+        table.insert(HighlightRegistry, hl)
+        table.insert(SelectedTargets, {target, color})
         return hl
     end
     return nil
@@ -1238,7 +1339,7 @@ FindCarsBtn.MouseButton1Click:Connect(function()
 
                 cBts[obj] = CreateButtonEx(cL, obj.Name, Theme.ElementBg, Theme.ElementHover, function()
                     sCar = (sCar == obj) and nil or obj
-                    sCarHL = applyHighlight(sCar, sCarHL, Theme.Accent)
+                    sCarHL = applyHighlight(sCar, Theme.Accent)
 
                     for _, c in pairs(cT:GetChildren()) do
                         if not c:IsA("UIListLayout") then c:Destroy() end
@@ -1358,14 +1459,14 @@ end)
 -- ==========================================
 -- ВКЛАДКА "ЛУТ" (кнопка наверху, таблицы на всю высоту)
 -- ==========================================
-local FindLootBtn = CreateButtonEx(PageLoot, T("🔍 НАЙТИ ЛУТ И МОТОРЫ"), Theme.Accent, Theme.AccentHover, function() end)
-FindLootBtn.LayoutOrder = 1
-FindLootBtn.Size = UDim2.new(0.98, 0, 0, 46)
-FindLootBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+local FindItemsBtn = CreateButtonEx(PageItems, T("🔍 НАЙТИ ПРЕДМЕТЫ И МОТОРЫ"), Theme.Accent, Theme.AccentHover, function() end)
+FindItemsBtn.LayoutOrder = 1
+FindItemsBtn.Size = UDim2.new(0.98, 0, 0, 46)
+FindItemsBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 
-local LootLayoutCont = Create("Frame", {Size = UDim2.new(1, 0, 1, -62), BackgroundTransparency = 1, LayoutOrder = 2, Parent = PageLoot})
-local iL = Create("ScrollingFrame", {Size = UDim2.new(0.35, 0, 1, 0), BackgroundTransparency = 1, ScrollBarThickness = 3, ScrollBarImageColor3 = Theme.Accent, AutomaticCanvasSize = Enum.AutomaticSize.Y, ScrollingDirection = Enum.ScrollingDirection.Y, ElasticBehavior = Enum.ElasticBehavior.Never, Parent = LootLayoutCont})
-local iT = Create("ScrollingFrame", {Size = UDim2.new(0.63, 0, 1, 0), Position = UDim2.new(0.37, 0, 0, 0), BackgroundTransparency = 1, ScrollBarThickness = 3, ScrollBarImageColor3 = Theme.Accent, AutomaticCanvasSize = Enum.AutomaticSize.Y, ScrollingDirection = Enum.ScrollingDirection.Y, ElasticBehavior = Enum.ElasticBehavior.Never, Parent = LootLayoutCont})
+local ItemsLayoutCont = Create("Frame", {Size = UDim2.new(1, 0, 1, -62), BackgroundTransparency = 1, LayoutOrder = 2, Parent = PageItems})
+local iL = Create("ScrollingFrame", {Size = UDim2.new(0.35, 0, 1, 0), BackgroundTransparency = 1, ScrollBarThickness = 3, ScrollBarImageColor3 = Theme.Accent, AutomaticCanvasSize = Enum.AutomaticSize.Y, ScrollingDirection = Enum.ScrollingDirection.Y, ElasticBehavior = Enum.ElasticBehavior.Never, Parent = ItemsLayoutCont})
+local iT = Create("ScrollingFrame", {Size = UDim2.new(0.63, 0, 1, 0), Position = UDim2.new(0.37, 0, 0, 0), BackgroundTransparency = 1, ScrollBarThickness = 3, ScrollBarImageColor3 = Theme.Accent, AutomaticCanvasSize = Enum.AutomaticSize.Y, ScrollingDirection = Enum.ScrollingDirection.Y, ElasticBehavior = Enum.ElasticBehavior.Never, Parent = ItemsLayoutCont})
 
 Create("UIListLayout", {Padding = UDim.new(0, 6), Parent = iL})
 Create("UIListLayout", {Padding = UDim.new(0, 6), Parent = iT})
@@ -1374,16 +1475,18 @@ local sIt = nil
 local iBts = {}
 local sItHL = nil
 
-FindLootBtn.MouseButton1Click:Connect(function()
+FindItemsBtn.MouseButton1Click:Connect(function()
     for _, o in pairs(Workspace:GetDescendants()) do
-        local isEngine = o.Name:lower():match("engine")
-        local isItem = o:FindFirstChild("chance") or o:FindFirstChild("id") or o:FindFirstChild("Values") or o:FindFirstChild("values")
+        local n = o.Name:lower()
+        local isSound = o:IsA("Sound") or o:IsA("AudioPlayer") or n:match("sound") or n:match("audio")
+        local isEngine = n:match("engine")
+        local isItem = o:IsA("Model") and (o:FindFirstChild("chance") or o:FindFirstChild("id") or o:FindFirstChild("Values") or o:FindFirstChild("values"))
 
-        if (o:IsA("Model") or o:IsA("Folder") or o:IsA("Tool") or isEngine) and not iBts[o] and (isItem or isEngine) then
+        if not isSound and not iBts[o] and (isItem or (o:IsA("Model") and isEngine)) then
 
             iBts[o] = CreateButtonEx(iL, o.Name, Theme.ElementBg, Theme.ElementHover, function()
                 sIt = (sIt == o) and nil or o
-                sItHL = applyHighlight(sIt, sItHL, Theme.Gold)
+                sItHL = applyHighlight(sIt, Theme.Gold)
 
                 for _, c in pairs(iT:GetChildren()) do
                     if not c:IsA("UIListLayout") then c:Destroy() end
@@ -1408,7 +1511,7 @@ FindLootBtn.MouseButton1Click:Connect(function()
             end)
         end
     end
-    Notify(T("Сканирование лута завершено"), Theme.Green)
+    Notify(T("Сканирование завершено"), Theme.Green)
 end)
 
 -- ==========================================
@@ -1497,6 +1600,10 @@ PlayerToggle("Нет стамины", "nostamina", "nostamina")
 PlayerToggle("Нет регдолла", "noragdoll", "noragdoll")
 PlayerToggle("Бессмертие", "godmode", "godmode")
 PlayerToggle("Бессмертие машины", "godcar", "godcar")
+
+CreateButtonEx(PagePlayers, "📂 ОКНО (скоро)", Theme.ElementBg, Theme.ElementHover, function()
+    Notify("Окно игроков — в разработке", Theme.Gold)
+end)
 
 Create("TextLabel", {Size = UDim2.new(0.98, 0, 0, 24), BackgroundTransparency = 1, Text = T(" ПОЛЕТ (БЕЗ ГРАВИТАЦИИ): ПРАВЫЙ CTRL"), TextColor3 = Theme.Accent, Font = Enum.Font.GothamBold, TextSize = 12, TextXAlignment = Enum.TextXAlignment.Left, Parent = PagePlayers})
 
@@ -1619,34 +1726,39 @@ end
 
 local function ApplyTheme(name)
     local pal = Palettes[name] or Palettes.black
-    local old = Theme
+    local directMap = {
+        [MainFrame] = pal.Background,
+        [Header] = pal.Header,
+        [Sidebar] = pal.Sidebar,
+        [Footer] = pal.Footer,
+        [OpenBtn] = pal.Accent
+    }
     for _, obj in ipairs(ScreenGui:GetDescendants()) do
         if obj:IsA("GuiObject") then
-            local bg = obj.BackgroundColor3
-            local txt = obj.TextColor3
-            for k, oldV in pairs(old) do
-                local newV = pal[k]
-                if newV then
-                    if bg == oldV then obj.BackgroundColor3 = newV end
-                    if txt == oldV then obj.TextColor3 = newV end
-                end
+            if directMap[obj] ~= nil then
+                obj.BackgroundColor3 = directMap[obj]
             end
-            local bc = obj:GetAttribute("BaseColor")
-            local hc = obj:GetAttribute("HoverColor")
-            if bc ~= nil then
-                for k, oldV in pairs(old) do
-                    if bc == oldV then obj:SetAttribute("BaseColor", pal[k]); break end
-                end
+            local bgKey = obj:GetAttribute("BgKey")
+            if bgKey and pal[bgKey] then
+                obj.BackgroundColor3 = pal[bgKey]
             end
-            if hc ~= nil then
-                for k, oldV in pairs(old) do
-                    if hc == oldV then obj:SetAttribute("HoverColor", pal[k]); break end
-                end
+            local txtKey = obj:GetAttribute("TextKey")
+            if txtKey and pal[txtKey] then
+                obj.TextColor3 = pal[txtKey]
+            end
+            local baseKeyA = obj:GetAttribute("BaseKey")
+            if baseKeyA and pal[baseKeyA] then
+                obj:SetAttribute("BaseColor", pal[baseKeyA])
+                obj.BackgroundColor3 = pal[baseKeyA]
+            end
+            local hoverKeyA = obj:GetAttribute("HoverKey")
+            if hoverKeyA and pal[hoverKeyA] then
+                obj:SetAttribute("HoverColor", pal[hoverKeyA])
             end
         elseif obj:IsA("UIStroke") then
-            local c = obj.Color
-            for k, oldV in pairs(old) do
-                if pal[k] and c == oldV then obj.Color = pal[k] end
+            local strokeKey = obj:GetAttribute("StrokeKey")
+            if strokeKey and pal[strokeKey] then
+                obj.Color = pal[strokeKey]
             end
         end
     end
@@ -1654,10 +1766,10 @@ local function ApplyTheme(name)
     CurrentTheme = name
     local glass = (name == "transparent")
     MainBaseTransparency = glass and 0.3 or 0
-    MainFrame.BackgroundTransparency = MainBaseTransparency
-    Header.BackgroundTransparency = glass and 0.15 or 0
-    Sidebar.BackgroundTransparency = glass and 0.15 or 0
-    Footer.BackgroundTransparency = glass and 0.15 or 0
+    PanelBaseTransparency = glass and 0.15 or 0
+    if MainFrame.Visible then
+        RestorePanelTransparency()
+    end
 end
 
 local function ApplyLanguage(lang)
@@ -1741,7 +1853,6 @@ local InfoCard = Create("Frame", {
 })
 AddCorner(InfoCard, 10)
 AddStroke(InfoCard, Theme.Outline, 1)
-ApplyGradient(InfoCard, Theme.ElementBg, Theme.Background, 90)
 
 Create("TextLabel", {
     Size = UDim2.new(1, -24, 0, 24),
